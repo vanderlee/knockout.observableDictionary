@@ -1,4 +1,4 @@
-﻿// Knockout Observable Dictionary
+// Knockout Observable Dictionary
 // (c) James Foster
 // License: MIT (http://www.opensource.org/licenses/mit-license.php)
 
