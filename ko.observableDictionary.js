@@ -22,8 +22,17 @@
         });
     }
 
-    ko.observableDictionary = function (dictionary, keySelector, valueSelector) {
+    ko.observableDictionary = function (newValueCallback, dictionary, keySelector, valueSelector) {
         var result = {};
+
+		if (newValueCallback && {}.toString.call(newValueCallback) == '[object Function]') {
+			result.newValueCallback = newValueCallback;
+		} else {
+			// shift arguments right
+			valueSelector	= keySelector;
+			keySelector		= map;
+			map				= newValueCallback;
+		}
 
         result.items = new ko.observableArray();
 
@@ -141,6 +150,10 @@
             return -1;
         },
 
+		has: function (key) {
+			return getValue(key, this.items()) ? true : false;
+		},
+
         get: function (key, wrap) {
             if (wrap == false)
                 return getValue(key, this.items());
@@ -151,6 +164,12 @@
                 wrapper = this._wrappers[key] = new ko.computed({
                     read: function () {
                         var value = getValue(key, this.items());
+
+                        if (!value) {
+                            this.push(key, this.newValueCallback(key));
+							value = getValue(key, this.items());
+						}
+
                         return value ? value() : null;
                     },
                     write: function (newValue) {
@@ -178,7 +197,7 @@
         values: function () {
             return ko.utils.arrayMap(this.items(), function (item) { return item.value(); });
         },
-        
+
         removeAll: function () {
             this.items.removeAll();
         },
